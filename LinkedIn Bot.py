@@ -5,6 +5,7 @@ from selenium.webdriver.chrome.options import ChromiumOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+from utils import *
 
 
 
@@ -25,8 +26,9 @@ def send_connect_to_related_profiles(driver):
 
     try:
         time.sleep(3)
-        related_profiles = driver.find_elements(By.XPATH,"//*[text()='People also viewed']/ancestor::div[@class='pvs-header__container']/following-sibling::div//ul/li/div/div/a")
-        related_profiles_URLS = [i.get_attribute('href') for i in related_profiles]
+        related_profiles = wait_for_elements_to_load(By.XPATH,"//*[text()='People also viewed']//following::ul[1]//a",driver)
+        # related_profiles = driver.find_elements(By.XPATH,"//*[text()='People also viewed']//following::ul[1]//a")
+        related_profiles_URLS = [related_profiles[i].get_attribute('href') for i in range(0,len(related_profiles),2)]
         print(related_profiles_URLS)
         print('\u2713','Related profiles found')
     except Exception as e:
@@ -43,17 +45,19 @@ def send_connect_to_related_profiles(driver):
                 print(random_profile)
                 driver.get(random_profile)
                 time.sleep(5)
+
                 name = driver.find_element(By.XPATH,
-                                               "//*[@class='text-heading-xlarge inline t-24 v-align-middle break-words']").text
-                driver.find_element(By.XPATH,"//*[@class='artdeco-button artdeco-button--2 artdeco-button--primary ember-view pvs-profile-actions__action']/span[text()='Connect']").click()
+                                               "//h1[1]").text
+                driver.find_element(By.XPATH,"(//button[contains(@class,'artdeco-button--primary') and span[text()='Connect']])[2]").click()
                 time.sleep(3)
-                driver.find_element(By.XPATH,"//*[@class='artdeco-button artdeco-button--muted artdeco-button--2 artdeco-button--secondary ember-view mr1']").click()
+                wait_for_element_to_load(By.XPATH,"//button[contains(@class,'artdeco-button') and span[text()='Add a note']]",driver).click()
+                # driver.find_element(By.XPATH,"//button[contains(@class,'artdeco-button') and span[text()='Add a note']]").click()
                 time.sleep(2)
 
                 message = f'hi! {name}'
-                driver.find_element(By.XPATH,'//*[@id="custom-message"]').send_keys(message)
+                wait_for_element_to_load(By.XPATH,'//*[@id="custom-message"]',driver).send_keys(message)
                 time.sleep(2)
-                driver.find_element(By.XPATH,"//*[@aria-label='Send now']").click()
+                waitforelemtobeclickable(By.XPATH,"//button[contains(@class,'artdeco-button') and span[text()='Send']]",driver).click()
                 print('\u2713', 'connect sent successfully')
                 counter +=1
 
@@ -71,6 +75,6 @@ def send_connect_to_related_profiles(driver):
 
 
 if __name__ == '__main__':
-    driver = initiate_driver('https://www.linkedin.com/in/francis-asabere-3b4791127/')
+    driver = initiate_driver('https://www.linkedin.com/in/shahzadi-riaz-724460237/')
 
     send_connect_to_related_profiles(driver)
